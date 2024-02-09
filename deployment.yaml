@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n29
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nthexception
+  template:
+    metadata:
+      labels:
+        app: nthexception
+    spec:
+      containers:
+      - name: nthexception
+        image: registry.gitlab.com/nthexception/nthexception:n29
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+                #            - name: NthException
+              #              value: "mongodb://nthexception:nthexception12345@10.8.0.122:27017/NthException?authSource=admin&retryWrites=true&w=majority"
+            - name: MONGO_URI
+              value: "mongodb://nthexception:nthexception12345@10.8.0.122:27017/NthException?authSource=admin&retryWrites=true&w=majority"
+            - name: MONGO_DB_NAME
+              value: "NthException"
+            - name: MONGO_COLLECTION_NAME
+              value: "PreProcessed"
+            - name: MONGO_COLLECTION_NAME_STAGE_1
+              value: "AIModel"
+            - name: MONGO_COLLECTION_NAME_STAGE_2
+              value: "PostProcessed" 
+            - name: MONGO_RAW_COLLECTION
+              value: "RawAddress" 
+            - name: MONGO_ISO_MAP_COLLECTION
+              value: "ISOStandard" 
+            # - name: DB_PASSWORD
+            #   valueFrom:
+            #      secretKeyRef:
+            #        name: db-secret
+            #        key: DB_PASSWORD
+      imagePullSecrets:
+      - name: gitlab-auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nthexception
+  namespace: dev
+spec:
+  ports:
+    - port: 8000
+  selector:
+    app: nthexception
